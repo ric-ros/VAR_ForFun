@@ -4,11 +4,11 @@
 
 <PageTitle>Weather forecast</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Weather forecast</MudText>
-<MudText Class="mb-8">This component demonstrates fetching data from the server.</MudText>
+<MudText Typo="Typo.h3" GutterBottom="true">Chiamata all'API</MudText>
+<MudText Class="mb-8">Caricamento rallentato volutamente di 3 secondi...</MudText>
 @if (forecasts == null)
 {
-    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    <MudProgressLinear Color="Color.Default" Indeterminate="true" />
 }
 else
 {
@@ -37,6 +37,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await Task.Delay(3000);
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
     }
 }
