@@ -1,18 +1,47 @@
 ﻿@inherits LayoutComponentBase
+@implements IAsyncDisposable
 
-<MudThemeProvider />
+
+<MudOverlay @bind-Visible="loadingSite" AutoClose="false" ZIndex="9999" id="loadingOverlay">
+    <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
+</MudOverlay>
+
+<MudThemeProvider @bind-IsDarkMode="@IsDarkMode" @ref="themeProvider" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
     <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        @if (width < maxWindowWidth)
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        }
+        else
+        {
+            <MudToggleIconButton ToggledChanged="DrawerToggle"
+                                 Icon="@Icons.Material.Filled.ArrowBack"
+                                 Color="@Color.Inherit"
+                                 Title="Chiudi Menu"
+                                 ToggledIcon="@Icons.Material.Filled.ArrowForward"
+                                 ToggledColor="@Color.Inherit"
+                                 ToggledTitle="Apri Menu" />
+        }
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit" Edge="Edge.Start" Link="/" />
+        <MudSpacer />
+        <MudToggleIconButton @bind-Toggled="@IsDarkMode"
+                             Icon="@Icons.Material.Filled.DarkMode"
+                             Color="@Color.Inherit"
+                             Title="Off"
+                             ToggledIcon="@Icons.TwoTone.LightMode"
+                             ToggledColor="@Color.Warning"
+                             ToggledTitle="On" />
+
+        <MudIconButton Icon="@Icons.Custom.Brands.Facebook" Color="Color.Inherit" Link="#" />
+        <MudIconButton Icon="@Icons.Custom.Brands.Instagram" Color="Color.Inherit" Link="#" />
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
-        <MudDrawerHeader>
+    <MudDrawer @bind-Open="isOpen" Elevation="@(width < maxWindowWidth ? 5 : 0)">
+        <MudDrawerHeader Class="@(IsDarkMode ? "" : "mud-theme-primary")">
             <MudText Typo="Typo.h6">VAR</MudText>
         </MudDrawerHeader>
         <NavMenu />
@@ -23,12 +52,61 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
 @code {
-    bool _drawerOpen = true;
+    bool isOpen;
+    bool clicked;
+    bool loadingSite = true;
+    public bool IsDarkMode { get; private set; }
+
+    [Inject] IResizeService ResizeService { get; set; }
+    Guid _subscriptionId;
+    int width;
+    int maxWindowWidth = 970;
+
+
+    MudThemeProvider themeProvider = new MudThemeProvider();
 
     void DrawerToggle()
     {
-        _drawerOpen = !_drawerOpen;
+        isOpen = !isOpen;
+        clicked = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ////prova per vedere se funziona il loadingSite
+            //await Task.Delay(2000);
+            loadingSite = false;
+            IsDarkMode = await themeProvider.GetSystemPreference();
+
+            width = (await ResizeService.GetBrowserWindowSize()).Width;
+            isOpen = width > maxWindowWidth;
+
+            //registro il delegate... qui ci pensa mudBlazor con il ResizeService
+            _subscriptionId = await ResizeService.Subscribe((size) =>
+            {
+                width = size.Width;
+                //height = size.Height; per ora non serve...
+
+                if (!clicked)
+                    isOpen = width > maxWindowWidth;
+
+                InvokeAsync(StateHasChanged);
+            }, new ResizeOptions
+            {
+                ReportRate = 50,
+                NotifyOnBreakpointOnly = false,
+            });
+
+            StateHasChanged();
+        }
+    }
+
+    //in teoria non dovrebbe mai usare il dispose sul MainLayout ma non si sa mai...
+    public async ValueTask DisposeAsync()
+    {
+        await ResizeService.Unsubscribe(_subscriptionId);
     }
 }
