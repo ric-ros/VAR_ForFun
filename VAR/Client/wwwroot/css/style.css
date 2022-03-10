@@ -1,0 +1,7 @@
+/* 
+    Per evitare lo zoom al doppio click da touchscreen
+*/
+body {
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+}

@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @implements IAsyncDisposable
 
-
+@* In caso il sito non dovesse caricare subito... *@
 <MudOverlay @bind-Visible="loadingSite" AutoClose="false" ZIndex="9999" id="loadingOverlay">
     <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
 </MudOverlay>
