@@ -1,14 +1,15 @@
 {
-  "name": "VAR",
   "short_name": "VAR",
-  "start_url": "./",
+  "name": "VAR project from REACT dev team",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#535353",
   "theme_color": "#535353",
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "icon-512.png",
+      "src": "images/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
