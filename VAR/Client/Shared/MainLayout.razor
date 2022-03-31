@@ -1,6 +1,5 @@
 ﻿@inherits LayoutComponentBase
 @implements IAsyncDisposable
-
 @* In caso il sito non dovesse caricare subito... *@
 <MudOverlay @bind-Visible="loadingSite" AutoClose="false" ZIndex="9999" id="loadingOverlay">
     <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
@@ -11,6 +10,7 @@
 <MudSnackbarProvider />
 
 <MudLayout>
+    <MudSwipeArea OnSwipe="@OnSwipe" Class="drawer-swipe-area" />
     <MudAppBar Elevation="0">
         @if (width < maxWindowWidth)
         {
@@ -88,9 +88,9 @@
             _subscriptionId = await ResizeService.Subscribe((size) =>
             {
                 width = size.Width;
-                //height = size.Height; per ora non serve...
+            //height = size.Height; per ora non serve...
 
-                if (!clicked)
+            if (!clicked)
                     isOpen = width > maxWindowWidth;
 
                 InvokeAsync(StateHasChanged);
@@ -108,5 +108,15 @@
     public async ValueTask DisposeAsync()
     {
         await ResizeService.Unsubscribe(_subscriptionId);
+    }
+
+
+    public void OnSwipe(SwipeDirection direction)
+    {
+        if (direction == SwipeDirection.LeftToRight && !isOpen)
+        {
+            isOpen = true;
+            StateHasChanged();
+        }
     }
 }

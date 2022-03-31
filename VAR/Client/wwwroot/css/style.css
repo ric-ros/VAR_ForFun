@@ -1,7 +1,18 @@
 /* 
     Per evitare lo zoom al doppio click da touchscreen
 */
+html {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 body {
     -ms-touch-action: manipulation;
     touch-action: manipulation;
+}
+
+.drawer-swipe-area {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
 }
