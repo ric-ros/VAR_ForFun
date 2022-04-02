@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @implements IAsyncDisposable
+@inject Blazored.LocalStorage.ILocalStorageService LS
+@inject IJSRuntime JS
 @* In caso il sito non dovesse caricare subito... *@
 <MudOverlay @bind-Visible="loadingSite" AutoClose="false" ZIndex="9999" id="loadingOverlay">
     <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
@@ -40,9 +42,13 @@
         <MudIconButton Icon="@Icons.Custom.Brands.Facebook" Color="Color.Inherit" Link="#" />
         <MudIconButton Icon="@Icons.Custom.Brands.Instagram" Color="Color.Inherit" Link="#" />
     </MudAppBar>
-    <MudDrawer @bind-Open="isOpen" Elevation="@(width < maxWindowWidth ? 5 : 0)" OpenMiniOnHover="true">
+    <MudDrawer @bind-Open="isOpen"
+               Elevation="@(width < maxWindowWidth ? 5 : 0)"
+               OpenMiniOnHover="true"
+               Variant="MudBlazor.DrawerVariant.Mini">
+
         <MudDrawerHeader Class="@(IsDarkMode ? "" : "mud-theme-primary")">
-            <MudText Typo="Typo.h6">VAR</MudText>
+            <MudText Typo="Typo.h6">@(isOpen ? "VAR" : "V")</MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>
@@ -50,16 +56,25 @@
         <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
             @Body
         </MudContainer>
+        @*@if (!isStandAlone && !dismissed)
+        {
+            <InstallPopUp />
+        }*@
     </MudMainContent>
 </MudLayout>
 @code {
     bool isOpen;
     bool clicked;
+    //bool isStandAlone;
+    //bool dismissed;
     bool loadingSite = true;
     public bool IsDarkMode { get; private set; }
 
+    [Inject] IBreakpointService BreakpointListener { get; set; }
     [Inject] IResizeService ResizeService { get; set; }
-    Guid _subscriptionId;
+
+    Guid _resizeSubscriptionId;
+    Guid _breakpointSubscriptionId;
     int width;
     int maxWindowWidth = 970;
 
@@ -71,6 +86,13 @@
         isOpen = !isOpen;
         clicked = true;
     }
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    isStandAlone = await JS.InvokeAsync<bool>("isInStandaloneMode");
+    //    dismissed = await LS.GetItemAsync<bool>("dismissed");
+    //}
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -85,12 +107,12 @@
             isOpen = width > maxWindowWidth;
 
             //registro il delegate... qui ci pensa mudBlazor con il ResizeService
-            _subscriptionId = await ResizeService.Subscribe((size) =>
+            _resizeSubscriptionId = await ResizeService.Subscribe((size) =>
             {
                 width = size.Width;
-            //height = size.Height; per ora non serve...
+                //height = size.Height; per ora non serve...
 
-            if (!clicked)
+                if (!clicked)
                     isOpen = width > maxWindowWidth;
 
                 InvokeAsync(StateHasChanged);
@@ -107,7 +129,7 @@
     //in teoria non dovrebbe mai usare il dispose sul MainLayout ma non si sa mai...
     public async ValueTask DisposeAsync()
     {
-        await ResizeService.Unsubscribe(_subscriptionId);
+        await ResizeService.Unsubscribe(_resizeSubscriptionId);
     }
 
 

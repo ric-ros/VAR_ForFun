@@ -1,8 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "short_name": "VAR",
-  "name": "VAR project from REACT dev team",
+  "name": "VAR",
+  "description": "VAR project from REACT dev team",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
   "background_color": "#535353",
   "theme_color": "#535353",
@@ -11,7 +12,7 @@
     {
       "src": "images/icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "180x180"
     }
   ]
 }

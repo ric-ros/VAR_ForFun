@@ -1,0 +1,40 @@
+﻿@inject IJSRuntime JS
+@inject Blazored.LocalStorage.ILocalStorageService LS
+
+@if (!Hidden)
+{
+    @if (isIos)
+    {
+
+        <div class="ios-prompt" @onclick="ClickHandlerIOS">
+            <span>&times;</span>
+            <img src="images/iOS/addToHome.svg">
+            <p>To install this Web App in your iPhone/iPad press <img src="images/iOS/share.svg"> and then Add to Home Screen.</p>
+        </div>
+    }
+    else
+    {
+        <button type="button">Install Web App</button>
+        <MudButton Color="Color.Primary" Class="ad2hs-prompt" Variant="Variant.Filled" @onclick="ClickHandler">Install Web App</MudButton>
+    }
+}
+
+
+@code {
+    bool Hidden { get; set; }
+    bool isIos = System.OperatingSystem.IsIOS();
+
+    async void ClickHandler(MouseEventArgs args)
+    {
+        await JS.InvokeVoidAsync("BlazorPWA.installPWA");
+        Hidden = true;
+        await LS.SetItemAsync("dismissed", true);
+    }
+
+    async void ClickHandlerIOS(MouseEventArgs args)
+    {
+        await JS.InvokeVoidAsync("BlazorPWA.installPWA");
+        Hidden = true;
+        await LS.SetItemAsync("dismissed", true);
+    }
+}
