@@ -2,11 +2,18 @@
 {
     public class Cell
     {
+        public int X { get; set; }
+        public int Y { get; set; }
         public bool IsAlive;
         private bool IsAliveNext;
 
         public readonly List<Cell> neighbors = new();
 
+        public Cell(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
         public void DetermineNextLiveState()
         {
             //Any live cell with fewer than two live neighbours dies, as if by underpopulation.
@@ -22,6 +29,7 @@
                 IsAliveNext = liveNeighbors == 2 || liveNeighbors == 3;
             else
                 IsAliveNext = liveNeighbors == 3;
+
         }
 
         public void Advance()

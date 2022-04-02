@@ -12,7 +12,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Client\VAR.Client.csproj" />
 		<ProjectReference Include="..\Shared\VAR.Shared.csproj" />
 	</ItemGroup>
 

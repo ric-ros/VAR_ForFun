@@ -25,7 +25,7 @@ namespace VAR.Shared.LifeModels
             Cells = new Cell[width / cellSize, height / cellSize];
             for (int x = 0; x < Columns; x++)
                 for (int y = 0; y < Rows; y++)
-                    Cells[x, y] = new Cell();
+                    Cells[x, y] = new Cell(x, y);
 
             ConnectNeighbors(wrap);
         }
@@ -42,8 +42,7 @@ namespace VAR.Shared.LifeModels
                     bool isBottomEdge = (y == Rows - 1);
                     bool isEdge = isLeftEdge | isRightEdge | isTopEdge | isBottomEdge;
 
-                    if ((wrap == false) && isEdge)
-                        continue;
+                    if (!wrap && isEdge) continue;
 
                     int xL = isLeftEdge ? Columns - 1 : x - 1;
                     int xR = isRightEdge ? 0 : x + 1;
