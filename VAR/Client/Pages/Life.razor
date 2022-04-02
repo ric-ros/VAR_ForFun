@@ -1,0 +1,127 @@
+﻿@using VAR.Shared.LifeModels
+@using Blazor.Extensions
+@using Blazor.Extensions.Canvas
+@using Blazor.Extensions.Canvas.Canvas2D
+
+@implements IDisposable
+@inject IJSRuntime JsRuntime;
+
+@page "/life"
+
+<PageTitle>Life</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Conway's Game of Life</MudText>
+
+<MudGrid Justify="Justify.Center">
+    <MudItem sm="6">
+        <MudColorPicker Variant="Variant.Outlined" Label="Colore Sfondo" PickerVariant="PickerVariant.Dialog"
+                        @bind-Text="BackgroundColor" Style="@($"color: {(BackgroundColor == "#32333d" ? "#FFFFFF" : BackgroundColor)};")" />
+    </MudItem>
+    <MudItem sm="6">
+        <MudColorPicker Variant="Variant.Outlined" Label="Colore Elemento" PickerVariant="PickerVariant.Dialog"
+                        @bind-Text="ElementColor" Style="@($"color: {(ElementColor == "#32333d" ? "#FFFFFF" : ElementColor)};")" />
+    </MudItem>
+    <MudItem sm="3">
+        <MudNumericField @bind-Value="Width" Label="Larghezza" Variant="Variant.Outlined" OnBlur="async() => await Reset()" />
+    </MudItem>
+    <MudItem sm="3">
+        <MudNumericField @bind-Value="Heigth" Label="Altezza" Variant="Variant.Outlined" OnBlur="async() => await Reset()" />
+    </MudItem>
+    <MudItem sm="3">
+        <MudNumericField @bind-Value="Milliseconds" Label="Refresh Rate (in millisecondi)" Variant="Variant.Outlined" OnBlur="async() => await Reset()" />
+    </MudItem>
+    <MudItem sm="3">
+        <MudNumericField @bind-Value="CellSize" Label="Grandezza Cella" Variant="Variant.Outlined" OnBlur="async() => await Reset()" />
+    </MudItem>
+    <MudItem Class="d-flex justify-center align-center" sm="6">
+        <MudCheckBox @bind-Checked="Stop" Color="Color.Primary" Label="Blocca il gioco"></MudCheckBox>
+    </MudItem>
+    <MudItem Class="d-flex justify-center align-center" sm="6">
+        <MudButton Variant="Variant.Outlined" OnClick="async() => await Reset()">Ricomincia il gioco</MudButton>
+    </MudItem>
+    <MudItem sm="12" Class="mt-4">
+        <BECanvas Width="Width" Height="Heigth" @ref="CanvasRef"></BECanvas>
+    </MudItem>
+</MudGrid>
+
+@code {
+    long Width { get; set; } = 500;
+    long Heigth { get; set; } = 400;
+    int Milliseconds { get; set; } = 300;
+    int CellSize { get; set; } = 20;
+    string BackgroundColor { get; set; } = "#32333d";
+    string ElementColor { get; set; } = "#fefefe";
+    bool Stop { get; set; }
+    Board board;
+    Timer timer;
+
+    Canvas2DContext _ctx;
+    protected BECanvasComponent CanvasRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            _ctx = await CanvasRef.CreateCanvas2DAsync();
+            await Reset();
+        }
+
+        timer = new Timer(async (e) =>
+        {
+            if (!Stop)
+            {
+                board.Advance();
+                await Render(Milliseconds);
+            }
+        }, null, 0, Milliseconds);
+
+        await base.OnInitializedAsync();
+    }
+
+
+    async Task Reset(bool randomize = true)
+    {
+        board = new Board(
+            Convert.ToInt32(Math.Round((double)Width)),
+            Convert.ToInt32(Math.Round((double)Heigth)),
+            CellSize);
+
+        if (randomize)
+            board.Randomize((double)20 / 100);
+
+        await Render(Milliseconds);
+    }
+
+    async Task Render(int milliseconds)
+    {
+        await _ctx.BeginBatchAsync();
+
+        for (int col = 0; col < board.Columns; col++)
+        {
+            for (int row = 0; row < board.Rows; row++)
+            {
+                var (x, y) = (col * board.CellSize, row * board.CellSize);
+                var cell = board.Cells[col, row];
+                if (cell.IsAlive)
+                {
+                    await _ctx.SetFillStyleAsync(ElementColor);
+                    await _ctx.FillRectAsync(x, y, Width, Heigth);
+                }
+                else
+                {
+                    await _ctx.SetFillStyleAsync(BackgroundColor);
+                    await _ctx.FillRectAsync(x, y, Width, Heigth);
+
+                }
+            }
+        }
+
+        await _ctx.EndBatchAsync();
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}

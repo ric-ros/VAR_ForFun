@@ -53,7 +53,7 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
+        <MudContainer MaxWidth="MaxWidth.Large" >
             @Body
         </MudContainer>
         @*@if (!isStandAlone && !dismissed)
@@ -65,8 +65,8 @@
 @code {
     bool isOpen;
     bool clicked;
-    //bool isStandAlone;
-    //bool dismissed;
+    bool isStandAlone;
+    bool dismissed;
     bool loadingSite = true;
     public bool IsDarkMode { get; private set; }
 
@@ -87,11 +87,11 @@
         clicked = true;
     }
 
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    isStandAlone = await JS.InvokeAsync<bool>("isInStandaloneMode");
-    //    dismissed = await LS.GetItemAsync<bool>("dismissed");
-    //}
+    protected override async Task OnInitializedAsync()
+    {
+        isStandAlone = await JS.InvokeAsync<bool>("isInStandaloneMode");
+        dismissed = await LS.GetItemAsync<bool>("dismissed");
+    }
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

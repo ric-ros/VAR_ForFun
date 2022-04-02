@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VAR.Shared.LifeModel
+namespace VAR.Shared.LifeModels
 {
     public class Board
     {

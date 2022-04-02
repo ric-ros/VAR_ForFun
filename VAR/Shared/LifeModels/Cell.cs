@@ -1,4 +1,4 @@
-﻿namespace VAR.Shared.LifeModel
+﻿namespace VAR.Shared.LifeModels
 {
     public class Cell
     {
